@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cut">
   <title>Missionsboard Klimawandel</title>
-  <link rel="stylesheet" href="https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod/index.css">
+  <link rel="stylesheet" href="assets/app.css">
   <style>
     html, body, #app { margin: 0; height: 100%; overflow: hidden; background: #fff; }
     body { font-family: system-ui, sans-serif; overscroll-behavior: none; }
@@ -20,97 +20,12 @@
       background: #1e1e1e; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.25);
     }
   </style>
-  <script>window.EXCALIDRAW_ASSET_PATH = "https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod/";</script>
-  <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@18.3.1",
-      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
-      "react-dom": "https://esm.sh/react-dom@18.3.1",
-      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
-    }
-  }
-  </script>
+  <script>window.EXCALIDRAW_ASSET_PATH = new URL("assets/", location.href).href;</script>
+  <script type="module" src="assets/app.js"></script>
 </head>
 <body>
   <div id="loading">Mindmap wird geladen …</div>
   <div id="app"></div>
   <button id="home" hidden>⌂ Übersicht</button>
-  <script type="module">
-    import React from "react";
-    import { createRoot } from "react-dom/client";
-    import { Excalidraw } from "https://esm.sh/@excalidraw/excalidraw@0.18.1?external=react,react-dom";
-
-    const scene = await (await fetch("mindmap.excalidraw")).json();
-    let api;
-
-    // Link-Symbole ausblenden: Links aus den Elementen entfernen und beim Antippen selbst öffnen
-    const links = new Map();
-    for (const el of scene.elements) {
-      if (el.link && el.type !== "embeddable") { links.set(el.id, el.link); el.link = null; }
-    }
-
-    const linkAt = (clientX, clientY) => {
-      const { scrollX, scrollY, zoom, offsetLeft, offsetTop } = api.getAppState();
-      const x = (clientX - offsetLeft) / zoom.value - scrollX;
-      const y = (clientY - offsetTop) / zoom.value - scrollY;
-      const els = api.getSceneElements();
-      for (let i = els.length - 1; i >= 0; i--) {
-        const el = els[i];
-        if (!links.has(el.id)) continue;
-        // Punkt in das (ggf. gedrehte) Koordinatensystem des Elements zurückdrehen
-        const cx = el.x + el.width / 2, cy = el.y + el.height / 2;
-        const cos = Math.cos(-el.angle), sin = Math.sin(-el.angle);
-        const px = cx + (x - cx) * cos - (y - cy) * sin;
-        const py = cy + (x - cx) * sin + (y - cy) * cos;
-        if (px >= el.x && px <= el.x + el.width && py >= el.y && py <= el.y + el.height) return links.get(el.id);
-      }
-    };
-
-    const appEl = document.getElementById("app");
-    let down = null;
-    appEl.addEventListener("pointerdown", (e) => {
-      down = e.isPrimary ? { x: e.clientX, y: e.clientY, t: Date.now() } : null;
-    }, true);
-    appEl.addEventListener("pointerup", (e) => {
-      if (!down || !api || !e.isPrimary) return;
-      const tap = Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8 && Date.now() - down.t < 500;
-      down = null;
-      const link = tap && linkAt(e.clientX, e.clientY);
-      if (link) window.open(link, "_blank", "noopener");
-    }, true);
-
-    const fit = () => api?.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.95, animate: true });
-
-    createRoot(document.getElementById("app")).render(
-      React.createElement(Excalidraw, {
-        initialData: {
-          elements: scene.elements,
-          files: scene.files,
-          appState: { viewBackgroundColor: scene.appState.viewBackgroundColor },
-          scrollToContent: true,
-        },
-        excalidrawAPI: (a) => { api = a; setTimeout(fit, 300); },
-        viewModeEnabled: true,
-        zenModeEnabled: true,
-        gridModeEnabled: false,
-        langCode: "de-DE",
-        validateEmbeddable: true,
-        UIOptions: {
-          canvasActions: {
-            changeViewBackgroundColor: false, clearCanvas: false, export: false,
-            loadScene: false, saveToActiveFile: false, saveAsImage: false, toggleTheme: false,
-          },
-          tools: { image: false },
-        },
-        renderTopRightUI: () => null,
-      })
-    );
-
-    document.getElementById("loading").remove();
-    const home = document.getElementById("home");
-    home.hidden = false;
-    home.onclick = fit;
-  </script>
 </body>
 </html>
