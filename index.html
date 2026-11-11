@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cut">
+  <title>Missionsboard Klimawandel</title>
+  <link rel="stylesheet" href="https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod/index.css">
+  <style>
+    html, body, #app { margin: 0; height: 100%; overflow: hidden; background: #fff; }
+    body { font-family: system-ui, sans-serif; overscroll-behavior: none; }
+    #loading { position: fixed; inset: 0; display: grid; place-items: center; color: #555; font-size: 18px; }
+    /* Kein Bearbeiten: alle Werkzeugleisten und Menüs ausblenden */
+    .excalidraw .App-menu_top, .excalidraw .main-menu-trigger, .excalidraw .help-icon,
+    .excalidraw .layer-ui__wrapper__footer-right, .excalidraw .App-toolbar,
+    .excalidraw .mobile-misc-tools-container, .excalidraw .App-bottom-bar,
+    .excalidraw .disable-zen-mode, .excalidraw .exit-view-mode { display: none !important; }
+    #home {
+      position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 10;
+      border: 0; border-radius: 999px; padding: 12px 18px; font-size: 16px;
+      background: #1e1e1e; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+  </style>
+  <script>window.EXCALIDRAW_ASSET_PATH = "https://esm.sh/@excalidraw/excalidraw@0.18.1/dist/prod/";</script>
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@18.3.1",
+      "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+      "react-dom": "https://esm.sh/react-dom@18.3.1",
+      "react-dom/client": "https://esm.sh/react-dom@18.3.1/client"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="loading">Mindmap wird geladen …</div>
+  <div id="app"></div>
+  <button id="home" hidden>⌂ Übersicht</button>
+  <script type="module">
+    import React from "react";
+    import { createRoot } from "react-dom/client";
+    import { Excalidraw } from "https://esm.sh/@excalidraw/excalidraw@0.18.1?external=react,react-dom";
+
+    const scene = await (await fetch("mindmap.excalidraw")).json();
+    let api;
+
+    const fit = () => api?.scrollToContent(undefined, { fitToViewport: true, viewportZoomFactor: 0.95, animate: true });
+
+    createRoot(document.getElementById("app")).render(
+      React.createElement(Excalidraw, {
+        initialData: {
+          elements: scene.elements,
+          files: scene.files,
+          appState: { viewBackgroundColor: scene.appState.viewBackgroundColor },
+          scrollToContent: true,
+        },
+        excalidrawAPI: (a) => { api = a; setTimeout(fit, 300); },
+        viewModeEnabled: true,
+        zenModeEnabled: true,
+        gridModeEnabled: false,
+        langCode: "de-DE",
+        validateEmbeddable: true,
+        UIOptions: {
+          canvasActions: {
+            changeViewBackgroundColor: false, clearCanvas: false, export: false,
+            loadScene: false, saveToActiveFile: false, saveAsImage: false, toggleTheme: false,
+          },
+          tools: { image: false },
+        },
+        renderTopRightUI: () => null,
+      })
+    );
+
+    document.getElementById("loading").remove();
+    const home = document.getElementById("home");
+    home.hidden = false;
+    home.onclick = fit;
+  </script>
+</body>
+</html>
