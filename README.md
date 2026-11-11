@@ -5,7 +5,14 @@ Schreibgeschützte Online-Ansicht der Excalidraw-Mindmap: https://c-siegel.githu
 - Zoomen, verschieben, Links öffnen und YouTube-Videos ansehen – keine Änderungen möglich.
 - `qr-code.png` führt direkt zur Seite.
 
-**Aktualisieren:** neue Version in Excalidraw exportieren, als `mindmap.excalidraw` hier ablegen, committen und pushen.
+**Aktualisieren:** neue Version aus Excalidraw speichern, dann Bilder verkleinern, committen und pushen:
+
+```
+python3 build/compress.py ~/Downloads/neue-version.excalidraw
+git add mindmap.excalidraw && git commit -m "Mindmap aktualisiert" && git push
+```
+
+`build/compress.py` verkleinert die Bilder (WebP, max. 2,5× Anzeigegröße) und schreibt `mindmap.excalidraw`.
 
 ## Technik
 
