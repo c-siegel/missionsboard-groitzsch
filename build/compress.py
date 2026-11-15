@@ -48,6 +48,13 @@ def compress(src, dst, scale=2.5, min_px=800, max_px=2000, quality=80):
         im.save(buf, "WEBP", quality=quality, method=6)
         files[k] = {**f, "mimeType": "image/webp",
                     "dataURL": "data:image/webp;base64," + base64.b64encode(buf.getvalue()).decode()}
+        # Zugeschnittene Bilder: Zuschnitt in Pixeln des Originals -> auf die neue Größe umrechnen
+        for e in els:
+            c = e.get("crop") if e["type"] == "image" and e.get("fileId") == k else None
+            if c and (c["naturalWidth"], c["naturalHeight"]) != im.size:
+                fx, fy = im.width / c["naturalWidth"], im.height / c["naturalHeight"]
+                e["crop"] = {"x": c["x"] * fx, "y": c["y"] * fy, "width": c["width"] * fx,
+                             "height": c["height"] * fy, "naturalWidth": im.width, "naturalHeight": im.height}
 
     out = {
         "type": "excalidraw",
